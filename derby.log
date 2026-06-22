@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sat Jun 20 08:47:36 AMT 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-019e-e512-835c-000009b20a00 
+on database directory /home/molivio/workspace/desenvol/python/poc/glue/metastore_db with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@42110406 
+Loaded from file:/home/molivio/workspace/desenvol/python/poc/glue/.venv/lib/python3.13/site-packages/pyspark/jars/derby-10.14.2.0.jar
+java.vendor=Amazon.com Inc.
+java.runtime.version=11.0.25+9-LTS
+user.dir=/home/molivio/workspace/desenvol/python/poc/glue
+os.name=Linux
+os.arch=amd64
+os.version=6.12.10-76061203-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
