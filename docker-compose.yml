@@ -1,0 +1,54 @@
+services:
+  localstack:
+    image: localstack/localstack:3.7
+    environment:
+      - SERVICES=dynamodb,ssm,s3
+      - DEFAULT_REGION=${AWS_REGION:-sa-east-1}
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./docker/localstack/init/ready.d:/etc/localstack/init/ready.d
+
+  bootstrap:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - localstack
+    environment:
+      - AWS_REGION=${AWS_REGION:-sa-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - DYNAMODB_TABLE=${DYNAMODB_TABLE:-tb_gm3_tailor_proposal}
+      - EXECUTION_PARAMETER=${EXECUTION_PARAMETER:-/local/tailor/glue-execution-date}
+    command: ["python", "-m", "jobs.localstack_bootstrap"]
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - localstack
+      - bootstrap
+    environment:
+      - JOB_NAME=${JOB_NAME:-tailor-proposal-local}
+      - AWS_REGION=${AWS_REGION:-sa-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - DYNAMODB_TABLE=${DYNAMODB_TABLE:-tb_gm3_tailor_proposal}
+      - DYNAMODB_GSI_NAME=${DYNAMODB_GSI_NAME:-gsi_startAt}
+      - DYNAMODB_PARTITION_KEY_NAME=${DYNAMODB_PARTITION_KEY_NAME:-staticPartitionKey}
+      - DYNAMODB_PARTITION_KEY_VALUE=${DYNAMODB_PARTITION_KEY_VALUE:-TAILOR}
+      - DYNAMODB_SORT_KEY_NAME=${DYNAMODB_SORT_KEY_NAME:-startAt}
+      - DATABASE_NAME_WRITE=${DATABASE_NAME_WRITE:-db_corp_canaisnaoassistidod_canaldigitalcorretora_sor_01}
+      - TABLE_NAME_WRITE=${TABLE_NAME_WRITE:-tb_gm3_tailor_proposal}
+      - EXECUTION_PARAMETER=${EXECUTION_PARAMETER:-/local/tailor/glue-execution-date}
+      - ENABLE_INCREMENTAL=${ENABLE_INCREMENTAL:-false}
+      - INCREMENTAL_COMPARISON_MODE=${INCREMENTAL_COMPARISON_MODE:-gt_plus_1_day}
+      - MESH_WRITE_MODE=${MESH_WRITE_MODE:-local}
+      - MESH_OUTPUT_LOCATION=/data/mesh/tb_gm3_tailor_proposal
+    volumes:
+      - ./data/mesh:/data/mesh
+    command: ["python", "-m", "jobs.tailor_proposal_job"]
